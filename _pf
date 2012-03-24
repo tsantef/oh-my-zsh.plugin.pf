@@ -1,0 +1,50 @@
+#compdef pf
+#autoload
+
+# PF autocomplete plugin for Oh-My-Zsh
+# Requires: The PHP Fog CLI (https://github.com/phpfog/pf)
+
+_get_apps() { 
+    for APP in `pf list apps | grep -E -o '(^.*) - ' | grep -E -o '^[a-z.-]+'`; do
+        compadd "$@" $APP
+    done
+}
+
+_get_sshkeys() { 
+    for SSHKEYS in `pf list sshkeys | grep -E -o '.* \(ID' | grep -E -o '.* '`; do
+        compadd "$@" $SSHKEYS
+    done
+}
+
+_pf() {
+    local start state
+    _arguments '1: :->start'
+    case $state in
+    start)
+        _arguments "1:Commands:(clone delete details list logout pull push setup update whoami)"
+    ;;
+    *)
+        case $words[2] in
+        clone)
+            _arguments "2: :_get_apps"
+        ;;
+        details)
+            _arguments "2: :_get_apps"
+        ;;
+        delete)
+            _arguments "2: :(app sshkey)"
+            case $words[3] in
+            app)
+                _arguments "3: :_get_apps"
+            ;;
+            sshkey)
+                _arguments "3: :_get_sshkeys"
+            ;;
+            esac
+        ;;
+        list)
+            _arguments "2: :(apps sshkeys)"
+        ;;
+        esac
+    esac
+}
